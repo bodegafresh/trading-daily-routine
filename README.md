@@ -31,7 +31,7 @@ Permite iniciar y cerrar una sesión de trading con comandos, realiza preguntas 
 - `docs/`: esquema de la hoja, comandos y máquina de estados
 
 ```md
-trading-routine-bot/
+trading-daily-routine/
 ├─ src/
 │ ├─ main.gs
 │ ├─ config/
