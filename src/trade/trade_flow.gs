@@ -112,6 +112,8 @@ class TradeFlow {
           ? "⛔️ <b>NO OPERAR</b> (estado emocional ≤ 3)\n\nPuedes igual cerrar con /trade stop si corresponde."
           : "🟢 Sesión habilitada.\n\nCuando termines: /trade stop");
 
+      TelegramClient.sendMessage(chatId, TradeRules.summary());
+
       return TelegramClient.sendMessage(chatId, msg);
     }
 

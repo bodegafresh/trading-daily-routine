@@ -1,7 +1,8 @@
 class TelegramRouter {
   static route(ctx) {
     const { chatId, text } = ctx;
-
+    Log.info("INCOMING", { chatId, text });
+    Log.info("ALLOWED", Env.getAllowedChatIds());
     // Authorization gate
     if (!Auth.isAuthorized(chatId)) {
       Log.warn("Unauthorized chatId tried to interact", { chatId, text });
@@ -26,13 +27,6 @@ class TelegramRouter {
       );
     }
 
-    if (TextUtils.isCommand(t, "/trade")) {
-      return this._reply(
-        chatId,
-        "Usa:\n• /trade start\n• /trade stop\n• /trade status\n• /trade cancel"
-      );
-    }
-
     if (TextUtils.isCommand(t, "/trade start")) {
       TradeCommands.start(chatId);
       return ContentService.createTextOutput("OK");
@@ -51,6 +45,13 @@ class TelegramRouter {
     if (TextUtils.isCommand(t, "/trade cancel")) {
       TradeCommands.cancel(chatId);
       return ContentService.createTextOutput("OK");
+    }
+
+    if (TextUtils.isCommand(t, "/trade", true)) {
+      return this._reply(
+        chatId,
+        "Usa:\n• /trade start\n• /trade stop\n• /trade status\n• /trade cancel"
+      );
     }
 
     // If not a command, maybe it is an answer to an ongoing flow

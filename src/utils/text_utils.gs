@@ -3,9 +3,14 @@ class TextUtils {
     return (text || "").trim();
   }
 
-  static isCommand(text, command) {
+  static isCommand(text, command, exact = false) {
     const t = this.normalize(text);
-    return t === command || t.startsWith(command + " ");
+    if (exact) return t === command || t.startsWith(command + "@"); // por grupos
+    return (
+      t === command ||
+      t.startsWith(command + " ") ||
+      t.startsWith(command + "@")
+    );
   }
 
   static parseIntSafe(text) {
