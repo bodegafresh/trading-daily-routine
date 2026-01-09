@@ -1,17 +1,6 @@
 class SheetRepository {
-  static _sheet() {
-    const ss = SpreadsheetApp.openById(Env.getSpreadsheetId());
-    const name = Env.getSheetName();
-    let sh = ss.getSheetByName(name);
-    if (!sh) {
-      sh = ss.insertSheet(name);
-      this._initHeader(sh);
-    }
-    return sh;
-  }
-
-  static _initHeader(sh) {
-    const header = [
+  static _header() {
+    return [
       "session_id",
       "date",
       "start_time",
@@ -29,6 +18,37 @@ class SheetRepository {
       "created_at_iso",
       "updated_at_iso",
     ];
+  }
+
+  static _sheet() {
+    const ss = SpreadsheetApp.openById(Env.getSpreadsheetId());
+    const name = Env.getSheetName();
+    let sh = ss.getSheetByName(name);
+
+    if (!sh) {
+      sh = ss.insertSheet(name);
+      this._writeHeaderToEmptySheet(sh);
+      return sh;
+    }
+
+    // ✅ NUEVO: si está vacía, agrega header
+    if (sh.getLastRow() === 0) {
+      this._writeHeaderToEmptySheet(sh);
+      return sh;
+    }
+
+    // ✅ NUEVO: si no tiene header (ej: ya escribiste datos en fila 1), inserta header arriba
+    const a1 = String(sh.getRange(1, 1).getValue() || "");
+    if (a1 !== "session_id") {
+      sh.insertRowBefore(1);
+      sh.getRange(1, 1, 1, this._header().length).setValues([this._header()]);
+    }
+
+    return sh;
+  }
+
+  static _writeHeaderToEmptySheet(sh) {
+    const header = this._header();
     sh.getRange(1, 1, 1, header.length).setValues([header]);
   }
 
@@ -43,12 +63,12 @@ class SheetRepository {
       startData.energy,
       startData.sleepQuality,
       startData.blockedNoTrade ? "true" : "false",
-      "", // rules_compliance
-      "", // dominant_emotion
-      "", // wins
-      "", // losses
-      "", // breakevens
-      "", // notes
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
       startData.createdAtIso,
       startData.updatedAtIso,
     ];
@@ -58,22 +78,18 @@ class SheetRepository {
   static updateStopFields(sessionId, stopData) {
     const sh = this._sheet();
     const lastRow = sh.getLastRow();
-    if (lastRow < 2) throw new Error("Sheet empty");
+    if (lastRow < 2) throw new Error("Sheet has no data rows");
 
-    // Find row by session_id in col A
-    const values = sh.getRange(2, 1, lastRow - 1, 1).getValues(); // session_id column
+    const values = sh.getRange(2, 1, lastRow - 1, 1).getValues(); // session_id col
     let rowIndex = -1;
     for (let i = 0; i < values.length; i++) {
       if (String(values[i][0]) === String(sessionId)) {
-        rowIndex = i + 2; // actual sheet row
+        rowIndex = i + 2;
         break;
       }
     }
-    if (rowIndex === -1)
-      throw new Error(`Session not found in sheet: ${sessionId}`);
+    if (rowIndex === -1) throw new Error(`Session not found: ${sessionId}`);
 
-    // Map to columns:
-    // D end_time, I rules_compliance, J dominant_emotion, K wins, L losses, M breakevens, N notes, P updated_at_iso
     sh.getRange(rowIndex, 4).setValue(stopData.endTime);
     sh.getRange(rowIndex, 9).setValue(stopData.rulesCompliance);
     sh.getRange(rowIndex, 10).setValue(stopData.dominantEmotion);

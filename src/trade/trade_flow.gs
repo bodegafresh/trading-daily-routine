@@ -112,7 +112,15 @@ class TradeFlow {
           ? "⛔️ <b>NO OPERAR</b> (estado emocional ≤ 3)\n\nPuedes igual cerrar con /trade stop si corresponde."
           : "🟢 Sesión habilitada.\n\nCuando termines: /trade stop");
 
-      TelegramClient.sendMessage(chatId, TradeRules.summary());
+      try {
+        if (typeof TradeRules !== "undefined" && TradeRules.summary) {
+          TelegramClient.sendMessage(chatId, TradeRules.summary());
+        } else {
+          Log.warn("TradeRules not found; skipping rules reminder");
+        }
+      } catch (e) {
+        Log.warn("Failed sending rules reminder", { message: e.message });
+      }
 
       return TelegramClient.sendMessage(chatId, msg);
     }
