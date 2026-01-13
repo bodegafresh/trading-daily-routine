@@ -1,7 +1,3 @@
-/**
- * Reads configuration from Script Properties.
- * Set these in Apps Script: Project Settings -> Script Properties.
- */
 class Env {
   static getTelegramToken() {
     return this._required("TELEGRAM_BOT_TOKEN");
@@ -21,6 +17,7 @@ class Env {
       .filter(Boolean);
   }
 
+  // 🔻 YA NO usar Sheets en este flujo (puedes dejarlo por compatibilidad)
   static getSpreadsheetId() {
     return this._required("SPREADSHEET_ID");
   }
@@ -32,12 +29,21 @@ class Env {
     );
   }
 
-  // ✅ NUEVO: Worker URL (webhook real)
+  // ✅ NUEVO: Supabase
+  static getSupabaseUrl() {
+    return this._required("SUPABASE_URL").replace(/\/+$/, "");
+  }
+
+  static getSupabaseKey() {
+    // Recomendación: usa SERVICE_ROLE en Apps Script (es server-side),
+    // o anon_key si vas a usar RLS con policies muy bien hechas.
+    return this._required("SUPABASE_KEY");
+  }
+
   static getWorkerUrl() {
     return this._required("WORKER_URL").replace(/\/+$/, "");
   }
 
-  // ✅ NUEVO: secret que Telegram enviará al Worker como header
   static getTelegramWebhookSecret() {
     return this._required("TG_WEBHOOK_SECRET");
   }
